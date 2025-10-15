@@ -22,8 +22,102 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        .left-column {
+            min-width: 0;
+        }
+
+        .favorites-pane {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .favorites-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .favorites-count {
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+        }
+
+        .favorites-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .favorite-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9ff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .favorite-item:hover {
+            background: #fff;
+            border-color: #ff6b6b;
+        }
+
+        .favorite-item .tire-name {
+            font-size: 0.85rem;
+        }
+
+        .favorite-item .tire-specs {
+            font-size: 0.85rem;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .favorite-item .tire-spec {
+            padding: 4px 8px;
+            min-width: 50px;
+        }
+
+        .favorite-item .tire-spec-value {
+            font-size: 0.95rem;
+        }
+
+        .favorite-item .tire-spec-label {
+            font-size: 0.6rem;
+        }
+
+        .empty-favorites {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-favorites-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
 
         .header {
@@ -163,11 +257,20 @@
             grid-template-columns: auto 1fr;
             gap: 15px;
             align-items: center;
+            cursor: pointer;
         }
 
         .tire-item:hover {
             background: #f8f9ff;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .tire-item.is-favorite {
+            background: #fff9e6;
+        }
+
+        .tire-item.is-favorite:hover {
+            background: #fff3cc;
         }
 
         .tire-specs {
@@ -233,6 +336,16 @@
                 grid-template-columns: 1fr;
             }
 
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .favorites-pane {
+                position: relative;
+                top: 0;
+                max-height: 400px;
+            }
+
             .tire-item {
                 grid-template-columns: 1fr;
             }
@@ -252,6 +365,7 @@
         function App() {
             const [tires, setTires] = useState([]);
             const [filteredTires, setFilteredTires] = useState([]);
+            const [favorites, setFavorites] = useState([]);
             const [loading, setLoading] = useState(true);
             const [filters, setFilters] = useState({
                 width: '',
@@ -326,6 +440,35 @@
                 applyFilters();
             }, [filters, tires]);
 
+            const toggleFavorite = (tire) => {
+                const isFavorite = favorites.some(f =>
+                    f.width === tire.width &&
+                    f.profile === tire.profile &&
+                    f.diameter === tire.diameter &&
+                    f.full_name === tire.full_name
+                );
+
+                if (isFavorite) {
+                    setFavorites(favorites.filter(f =>
+                        !(f.width === tire.width &&
+                          f.profile === tire.profile &&
+                          f.diameter === tire.diameter &&
+                          f.full_name === tire.full_name)
+                    ));
+                } else {
+                    setFavorites([...favorites, tire]);
+                }
+            };
+
+            const isFavorite = (tire) => {
+                return favorites.some(f =>
+                    f.width === tire.width &&
+                    f.profile === tire.profile &&
+                    f.diameter === tire.diameter &&
+                    f.full_name === tire.full_name
+                );
+            };
+
             return (
                 <div className="container">
                     <div className="header">
@@ -333,7 +476,9 @@
                         <p>Search through {tires.length.toLocaleString()} tire specifications</p>
                     </div>
 
-                    <div className="search-card">
+                    <div className="main-content">
+                        <div className="left-column">
+                            <div className="search-card">
                         <div className="filters">
                             <div className="filter-group">
                                 <label>Width (mm)</label>
@@ -383,7 +528,7 @@
                         </div>
                     </div>
 
-                    <div className="results-card">
+                            <div className="results-card">
                         <div className="stats">
                             <div className="stats-info">
                                 Showing <span className="stats-count">{filteredTires.length.toLocaleString()}</span> of {tires.length.toLocaleString()} tires
@@ -401,7 +546,11 @@
                         ) : (
                             <div className="results-grid">
                                 {filteredTires.map((tire, index) => (
-                                    <div key={index} className="tire-item">
+                                    <div
+                                        key={index}
+                                        className={`tire-item ${isFavorite(tire) ? 'is-favorite' : ''}`}
+                                        onClick={() => toggleFavorite(tire)}
+                                    >
                                         <div className="tire-specs">
                                             <div className="tire-spec">
                                                 <div className="tire-spec-label">Width</div>
@@ -423,6 +572,51 @@
                                 ))}
                             </div>
                         )}
+                    </div>
+                        </div>
+
+                        <div className="favorites-pane">
+                            <div className="favorites-header">
+                                Favorites
+                                {favorites.length > 0 && (
+                                    <span className="favorites-count">{favorites.length}</span>
+                                )}
+                            </div>
+                            <div className="favorites-list">
+                                {favorites.length === 0 ? (
+                                    <div className="empty-favorites">
+                                        <div className="empty-favorites-icon">⭐</div>
+                                        <p>Click on tires to add them to favorites</p>
+                                    </div>
+                                ) : (
+                                    favorites.map((tire, index) => (
+                                        <div
+                                            key={index}
+                                            className="favorite-item"
+                                            onClick={() => toggleFavorite(tire)}
+                                        >
+                                            <div className="tire-specs">
+                                                <div className="tire-spec">
+                                                    <div className="tire-spec-label">Width</div>
+                                                    <div className="tire-spec-value">{tire.width}</div>
+                                                </div>
+                                                <div className="tire-spec">
+                                                    <div className="tire-spec-label">Profile</div>
+                                                    <div className="tire-spec-value">{tire.profile}</div>
+                                                </div>
+                                                <div className="tire-spec">
+                                                    <div className="tire-spec-label">Diameter</div>
+                                                    <div className="tire-spec-value">{tire.diameter}"</div>
+                                                </div>
+                                            </div>
+                                            <div className="tire-name">
+                                                {tire.full_name}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
