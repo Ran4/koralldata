@@ -151,60 +151,59 @@
 
         .results-grid {
             display: grid;
-            gap: 15px;
+            gap: 4px;
         }
 
         .tire-item {
-            padding: 20px;
-            border: 2px solid #f0f0f0;
+            padding: 10px 12px;
+            border: none;
             border-radius: 8px;
             transition: all 0.2s;
             display: grid;
             grid-template-columns: auto 1fr;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
         }
 
         .tire-item:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
+            background: #f8f9ff;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
         }
 
         .tire-specs {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             font-weight: 700;
             color: #667eea;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .tire-spec {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 15px;
+            padding: 8px 12px;
             background: #f8f9ff;
             border-radius: 6px;
-            min-width: 70px;
+            min-width: 60px;
         }
 
         .tire-spec-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #999;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .tire-spec-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #667eea;
         }
 
         .tire-name {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: #333;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .loading {
