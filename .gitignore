@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+tire_data.db
+parsed_tire_data.json
+output.json
+.claude
+raw_tire_data.json

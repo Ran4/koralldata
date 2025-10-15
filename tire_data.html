@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tire Data Search</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-search {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-search:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-clear {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-clear:hover {
+            background: #d0d0d0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .stats-info {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .stats-count {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .tire-item {
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .tire-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .tire-specs {
+            display: flex;
+            gap: 15px;
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .tire-spec {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f8f9ff;
+            border-radius: 6px;
+            min-width: 70px;
+        }
+
+        .tire-spec-label {
+            font-size: 0.7rem;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .tire-spec-value {
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .tire-name {
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .no-results-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .tire-item {
+                grid-template-columns: 1fr;
+            }
+
+            .tire-specs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [tires, setTires] = useState([]);
+            const [filteredTires, setFilteredTires] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [filters, setFilters] = useState({
+                width: '',
+                profile: '',
+                diameter: '',
+                search: ''
+            });
+
+            useEffect(() => {
+                // Load tire data from JSON file
+                fetch('parsed_tire_data.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        setTires(data);
+                        setFilteredTires(data);
+                        setLoading(false);
+                    })
+                    .catch(error => {
+                        console.error('Error loading tire data:', error);
+                        setLoading(false);
+                    });
+            }, []);
+
+            const handleFilterChange = (field, value) => {
+                setFilters(prev => ({
+                    ...prev,
+                    [field]: value
+                }));
+            };
+
+            const applyFilters = () => {
+                let result = [...tires];
+
+                if (filters.width) {
+                    result = result.filter(tire => tire.width === parseInt(filters.width));
+                }
+
+                if (filters.profile) {
+                    result = result.filter(tire => tire.profile === parseInt(filters.profile));
+                }
+
+                if (filters.diameter) {
+                    result = result.filter(tire => tire.diameter === parseInt(filters.diameter));
+                }
+
+                if (filters.search) {
+                    const searchLower = filters.search.toLowerCase();
+                    result = result.filter(tire =>
+                        tire.full_name.toLowerCase().includes(searchLower)
+                    );
+                }
+
+                setFilteredTires(result);
+            };
+
+            const clearFilters = () => {
+                setFilters({
+                    width: '',
+                    profile: '',
+                    diameter: '',
+                    search: ''
+                });
+                setFilteredTires(tires);
+            };
+
+            const getUniqueValues = (field) => {
+                const values = [...new Set(tires.map(tire => tire[field]))].sort((a, b) => a - b);
+                return values;
+            };
+
+            useEffect(() => {
+                applyFilters();
+            }, [filters, tires]);
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1>🚗 Tire Data Search</h1>
+                        <p>Search through {tires.length.toLocaleString()} tire specifications</p>
+                    </div>
+
+                    <div className="search-card">
+                        <div className="filters">
+                            <div className="filter-group">
+                                <label>Width (mm)</label>
+                                <input
+                                    type="number"
+                                    placeholder="e.g., 235"
+                                    value={filters.width}
+                                    onChange={(e) => handleFilterChange('width', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Profile (%)</label>
+                                <input
+                                    type="number"
+                                    placeholder="e.g., 35"
+                                    value={filters.profile}
+                                    onChange={(e) => handleFilterChange('profile', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Diameter (inches)</label>
+                                <input
+                                    type="number"
+                                    placeholder="e.g., 19"
+                                    value={filters.diameter}
+                                    onChange={(e) => handleFilterChange('diameter', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Search Brand/Model</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g., Michelin, Continental..."
+                                    value={filters.search}
+                                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="button-group">
+                            <button className="btn-clear" onClick={clearFilters}>
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="results-card">
+                        <div className="stats">
+                            <div className="stats-info">
+                                Showing <span className="stats-count">{filteredTires.length.toLocaleString()}</span> of {tires.length.toLocaleString()} tires
+                            </div>
+                        </div>
+
+                        {loading ? (
+                            <div className="loading">Loading tire data...</div>
+                        ) : filteredTires.length === 0 ? (
+                            <div className="no-results">
+                                <div className="no-results-icon">🔍</div>
+                                <h3>No tires found</h3>
+                                <p>Try adjusting your filters</p>
+                            </div>
+                        ) : (
+                            <div className="results-grid">
+                                {filteredTires.map((tire, index) => (
+                                    <div key={index} className="tire-item">
+                                        <div className="tire-specs">
+                                            <div className="tire-spec">
+                                                <div className="tire-spec-label">Width</div>
+                                                <div className="tire-spec-value">{tire.width}</div>
+                                            </div>
+                                            <div className="tire-spec">
+                                                <div className="tire-spec-label">Profile</div>
+                                                <div className="tire-spec-value">{tire.profile}</div>
+                                            </div>
+                                            <div className="tire-spec">
+                                                <div className="tire-spec-label">Diameter</div>
+                                                <div className="tire-spec-value">{tire.diameter}"</div>
+                                            </div>
+                                        </div>
+                                        <div className="tire-name">
+                                            {tire.full_name}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

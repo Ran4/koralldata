@@ -1,0 +1,9 @@
+[project]
+name = "koralldata"
+version = "0.1.0"
+description = "Queries Koralldata because the web interface is terrible"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "requests>=2.32.3",
+]
