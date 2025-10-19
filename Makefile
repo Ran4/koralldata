@@ -1,4 +1,5 @@
 .PHONY: run
 
 run:
-	@uv run python sync_tire_data_with_koralldata.py
+	uv run python serve.py &
+	firefox http://localhost:8000/tire_data.html
