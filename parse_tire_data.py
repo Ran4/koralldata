@@ -69,12 +69,6 @@ def main():
     # Sort by width, profile, diameter
     tire_list.sort(key=lambda x: (x["width"], x["profile"], x["diameter"], x["full_name"]))
 
-    # Save to JSON
-    with open('parsed_tire_data.json', 'w', encoding='utf-8') as f:
-        json.dump(tire_list, f, indent=2, ensure_ascii=False)
-
-    print(f"Saved to parsed_tire_data.json")
-
     # Save to SQLite database
     print("\nSaving to SQLite database...")
     conn = sqlite3.connect('tire_data.db')
