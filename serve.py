@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
     # Get count
     cursor = db_conn.execute("SELECT COUNT(*) FROM tires")
     count = cursor.fetchone()[0]
-    print(f"Loaded {count:,} tires into memory")
+    print(f"Loaded {count:} tires into memory")
 
     yield
 
@@ -78,7 +78,9 @@ def search_tires(
         params.append(f"%{search}%")
 
     if hide_all_season:
-        query += " AND full_name NOT LIKE '%allseas%' AND full_name NOT LIKE '%all season%'"
+        query += (
+            " AND full_name NOT LIKE '%allseas%' AND full_name NOT LIKE '%all season%'"
+        )
 
     query += " ORDER BY width, profile, diameter, full_name"
 
@@ -108,4 +110,5 @@ def read_root():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
