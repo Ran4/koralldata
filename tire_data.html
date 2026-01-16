@@ -405,9 +405,19 @@
                 search: ''
             });
 
-            useEffect(() => {
-                // Load tire data from JSON file
-                fetch('parsed_tire_data.json')
+            const fetchTires = () => {
+                setLoading(true);
+
+                // Build query parameters
+                const params = new URLSearchParams();
+
+                if (filters.width) params.append('width', filters.width);
+                if (filters.profile) params.append('profile', filters.profile);
+                if (filters.diameter) params.append('diameter', filters.diameter);
+                if (filters.search) params.append('search', filters.search);
+                params.append('hide_all_season', hideAllSeason);
+
+                fetch(`/api/tires?${params.toString()}`)
                     .then(response => response.json())
                     .then(data => {
                         setTires(data);
@@ -418,45 +428,18 @@
                         console.error('Error loading tire data:', error);
                         setLoading(false);
                     });
-            }, []);
+            };
+
+            useEffect(() => {
+                // Load tire data from API
+                fetchTires();
+            }, [filters, hideAllSeason]);
 
             const handleFilterChange = (field, value) => {
                 setFilters(prev => ({
                     ...prev,
                     [field]: value
                 }));
-            };
-
-            const applyFilters = () => {
-                let result = [...tires];
-
-                if (filters.width) {
-                    result = result.filter(tire => tire.width === parseInt(filters.width));
-                }
-
-                if (filters.profile) {
-                    result = result.filter(tire => tire.profile === parseInt(filters.profile));
-                }
-
-                if (filters.diameter) {
-                    result = result.filter(tire => tire.diameter === parseInt(filters.diameter));
-                }
-
-                if (filters.search) {
-                    const searchLower = filters.search.toLowerCase();
-                    result = result.filter(tire =>
-                        tire.full_name.toLowerCase().includes(searchLower)
-                    );
-                }
-
-                if (hideAllSeason) {
-                    result = result.filter(tire => {
-                        const nameLower = tire.full_name.toLowerCase();
-                        return !nameLower.includes('allseas') && !nameLower.includes('all season');
-                    });
-                }
-
-                setFilteredTires(result);
             };
 
             const clearFilters = () => {
@@ -466,17 +449,7 @@
                     diameter: '',
                     search: ''
                 });
-                setFilteredTires(tires);
             };
-
-            const getUniqueValues = (field) => {
-                const values = [...new Set(tires.map(tire => tire[field]))].sort((a, b) => a - b);
-                return values;
-            };
-
-            useEffect(() => {
-                applyFilters();
-            }, [filters, tires, hideAllSeason]);
 
             const toggleFavorite = (tire) => {
                 const isFavorite = favorites.some(f =>
@@ -511,7 +484,7 @@
                 <div className="container">
                     <div className="header">
                         <h1>🚗 Tire Data Search</h1>
-                        <p>Search through {tires.length.toLocaleString()} tire specifications</p>
+                        <p>Search through thousands of tire specifications</p>
                     </div>
 
                     <div className="main-content">
@@ -577,7 +550,7 @@
                             <div className="results-card">
                         <div className="stats">
                             <div className="stats-info">
-                                Showing <span className="stats-count">{filteredTires.length.toLocaleString()}</span> of {tires.length.toLocaleString()} tires
+                                Showing <span className="stats-count">{filteredTires.length.toLocaleString()}</span> tires
                             </div>
                         </div>
 
