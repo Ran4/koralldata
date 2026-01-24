@@ -451,6 +451,21 @@
                 });
             };
 
+            const handleWidthPaste = (e) => {
+                const pasted = e.clipboardData.getData('text');
+                // Match tire size pattern like "245/45R20" or "245/45 R 20"
+                const match = pasted.match(/(\d{3})\s*\/\s*(\d{2})\s*[Rr]\s*(\d{2})/);
+                if (match) {
+                    e.preventDefault();
+                    setFilters(prev => ({
+                        ...prev,
+                        width: match[1],
+                        profile: match[2],
+                        diameter: match[3]
+                    }));
+                }
+            };
+
             const toggleFavorite = (tire) => {
                 const isFavorite = favorites.some(f =>
                     f.width === tire.width &&
@@ -494,10 +509,11 @@
                             <div className="filter-group">
                                 <label>Width (mm)</label>
                                 <input
-                                    type="number"
-                                    placeholder="e.g., 235"
+                                    type="text"
+                                    placeholder="e.g., 235 or 245/45R20"
                                     value={filters.width}
                                     onChange={(e) => handleFilterChange('width', e.target.value)}
+                                    onPaste={handleWidthPaste}
                                 />
                             </div>
 
