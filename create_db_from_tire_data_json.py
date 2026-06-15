@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import sqlite3
 from typing import Optional
+
+DATA_DIR = "data"
+RAW_JSON_PATH = os.path.join(DATA_DIR, "raw_tire_data.json")
+DB_PATH = os.path.join(DATA_DIR, "tire_data.db")
 
 def extract_tire_dimensions(tire_name: str) -> Optional[dict]:
     """Extract width, profile, and diameter from tire name."""
@@ -43,8 +48,8 @@ def extract_tire_strings(obj, results=None):
     return results
 
 def main():
-    print("Loading raw_tire_data.json...")
-    with open('raw_tire_data.json', 'r', encoding='utf-8') as f:
+    print(f"Loading {RAW_JSON_PATH}...")
+    with open(RAW_JSON_PATH, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
     print("Extracting tire names...")
@@ -71,7 +76,8 @@ def main():
 
     # Save to SQLite database
     print("\nSaving to SQLite database...")
-    conn = sqlite3.connect('tire_data.db')
+    os.makedirs(DATA_DIR, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     # Create table
@@ -93,7 +99,7 @@ def main():
     )
 
     conn.commit()
-    print(f"Saved {cursor.rowcount} tires to tire_data.db")
+    print(f"Saved {cursor.rowcount} tires to {DB_PATH}")
 
     # Show some stats
     cursor.execute('SELECT COUNT(*) FROM tires')

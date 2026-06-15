@@ -9,8 +9,7 @@ wheels/
 # Virtual environments
 .venv
 
-tire_data.db
-parsed_tire_data.json
+# Generated data (fetched dump + built DB)
+data/
 output.json
 .claude
-raw_tire_data.json

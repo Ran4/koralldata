@@ -19,7 +19,7 @@ def load_database_to_memory():
     memory_conn.row_factory = sqlite3.Row
 
     # Load from disk
-    disk_conn = sqlite3.connect("tire_data.db")
+    disk_conn = sqlite3.connect("data/tire_data.db")
     disk_conn.backup(memory_conn)
     disk_conn.close()
 

@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import json
+import os
 from datetime import datetime
 import requests
 
-from query_templating import get_query_template
+from .query_templating import get_query_template
+
+DATA_DIR = "data"
 
 
 def get_data_dict():
@@ -20,7 +23,7 @@ def get_data_dict():
             "Content-Type": "application/json",
             "Origin": "http://shop.koralldata.se",
             "Connection": "keep-alive",
-            "Cookie": "dfWebApp=1E0B667E-4911-4A31-837A-B07DD79D50D9",
+            "Cookie": "dfWebApp=D022FE1D-2A68-4E92-8318-588204DCCC7B",
         },
         json=template_dict,
     )
@@ -32,7 +35,6 @@ def get_data_dict():
 
 
 def get_tire_names(data_dict) -> list[str]:
-    breakpoint()
     tires = data_dict["Header"]["aActions"][1]["tData"]["c"]
     assert isinstance(tires, list), tires
 
@@ -40,9 +42,17 @@ def get_tire_names(data_dict) -> list[str]:
 
 
 def main():
+    os.makedirs(DATA_DIR, exist_ok=True)
+
     data_dict = get_data_dict()
 
-    with open("raw_tire_data.json", "w") as f:
+    raw_path = os.path.join(DATA_DIR, "raw_tire_data.json")
+    if os.path.exists(raw_path):
+        backup_path = raw_path + ".bak"
+        os.replace(raw_path, backup_path)
+        print(f"Backed up previous {raw_path} -> {backup_path}")
+
+    with open(raw_path, "w") as f:
         f.write(json.dumps(data_dict, indent=4))
 
     tire_names: list[str] = get_tire_names(data_dict)
@@ -50,7 +60,8 @@ def main():
 
     date_str = datetime.now().strftime("%Y-%m-%d__%H_%M")
 
-    with open(filename := f"tire_names_{date_str}.txt", "w") as f:
+    filename = os.path.join(DATA_DIR, f"tire_names_{date_str}.txt")
+    with open(filename, "w") as f:
         f.write("\n".join(tire_names))
     print(f"Wrote {len(tire_names)} lines of tyre data to {filename}")
 
