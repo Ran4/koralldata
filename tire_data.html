@@ -411,7 +411,9 @@
                 // Build query parameters
                 const params = new URLSearchParams();
 
-                if (filters.width) params.append('width', filters.width);
+                // Only send a numeric width; partial input like "/" or "245/45"
+                // must not reach the API, which expects an int and would 422.
+                if (/^\d+$/.test(filters.width)) params.append('width', filters.width);
                 if (filters.profile) params.append('profile', filters.profile);
                 if (filters.diameter) params.append('diameter', filters.diameter);
                 if (filters.search) params.append('search', filters.search);
@@ -420,8 +422,12 @@
                 fetch(`/api/tires?${params.toString()}`)
                     .then(response => response.json())
                     .then(data => {
-                        setTires(data);
-                        setFilteredTires(data);
+                        // The API returns an array; on a validation error it returns
+                        // an object ({detail: ...}) instead. Guard against that so a
+                        // bad response can never crash the render.
+                        const list = Array.isArray(data) ? data : [];
+                        setTires(list);
+                        setFilteredTires(list);
                         setLoading(false);
                     })
                     .catch(error => {
@@ -451,18 +457,21 @@
                 });
             };
 
-            const handleWidthPaste = (e) => {
-                const pasted = e.clipboardData.getData('text');
-                // Match tire size pattern like "245/45R20" or "245/45 R 20"
-                const match = pasted.match(/(\d{3})\s*\/\s*(\d{2})\s*[Rr]\s*(\d{2})/);
+            // Handle the Width field. If the value is a full tire size typed or
+            // pasted in (e.g. "245/45R20" or "245/45 R 20"), split it across
+            // width/profile/diameter. Otherwise keep it as-is (a plain width like
+            // "235", or partial input such as "/" while typing).
+            const handleWidthChange = (value) => {
+                const match = value.match(/(\d{3})\s*\/\s*(\d{2})\s*[Rr]?\s*(\d{2})/);
                 if (match) {
-                    e.preventDefault();
                     setFilters(prev => ({
                         ...prev,
                         width: match[1],
                         profile: match[2],
                         diameter: match[3]
                     }));
+                } else {
+                    setFilters(prev => ({ ...prev, width: value }));
                 }
             };
 
@@ -512,8 +521,7 @@
                                     type="text"
                                     placeholder="e.g., 235 or 245/45R20"
                                     value={filters.width}
-                                    onChange={(e) => handleFilterChange('width', e.target.value)}
-                                    onPaste={handleWidthPaste}
+                                    onChange={(e) => handleWidthChange(e.target.value)}
                                 />
                             </div>
 

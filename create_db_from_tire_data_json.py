@@ -80,6 +80,10 @@ def main():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
+    # Rebuild from scratch so the DB reflects exactly the latest dump
+    # (no stale/accumulated tires from previous fetches).
+    cursor.execute('DROP TABLE IF EXISTS tires')
+
     # Create table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tires (
